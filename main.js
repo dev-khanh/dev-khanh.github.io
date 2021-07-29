@@ -3,25 +3,31 @@ window.boot = function () {
     window._CCSettings = undefined;
     var onProgress = null;
     
-    var RESOURCES = cc.AssetManager.BuiltinBundleName.RESOURCES;
-    var INTERNAL = cc.AssetManager.BuiltinBundleName.INTERNAL;
-    var MAIN = cc.AssetManager.BuiltinBundleName.MAIN;
+    let { RESOURCES, INTERNAL, MAIN, START_SCENE } = cc.AssetManager.BuiltinBundleName;
     function setLoadingDisplay () {
         // Loading splash scene
         var splash = document.getElementById('splash');
-        var progressBar = splash.querySelector('#progress-fill');
+		/*
+        var progressBar = splash.querySelector('.progress-bar span');
+        onProgress = function (finish, total) {
+            var percent = 100 * finish / total;
+            if (progressBar) {
+                progressBar.style.width = percent.toFixed(2) + '%';
+            }
+        };
+        splash.style.display = 'block';
+        progressBar.style.width = '0%';
+		*/
+		var progressBar = splash.querySelector('#progress-fill');
+		progressBar.style.clipPath = "inset(0 100% 0 0)";
         onProgress = function (finish, total) {
             var percent = 100 * finish / total;
             if (progressBar) {
 				var percentage = (100 - percent.toFixed(2)) + '%';
-				progressBar.style.clipPath = "inset(0px " + percentage + " 0px 0px)";
+				progressBar.style.clipPath = "inset(0 " + percentage + " 0 0)";
                 //progressBar.style.width = percent.toFixed(2) + '%';
             }
         };
-        splash.style.display = 'block';
-		progressBar.style.clipPath = "inset(0px 100% 0px 0px)";
-		progressBar.style.display = 'block';
-        //progressBar.style.width = '0%';
 
         cc.director.once(cc.Director.EVENT_AFTER_SCENE_LAUNCH, function () {
             splash.style.display = 'none';
@@ -50,8 +56,6 @@ window.boot = function () {
                 cc.sys.BROWSER_TYPE_WECHAT,
                 cc.sys.BROWSER_TYPE_MOBILE_QQ,
                 cc.sys.BROWSER_TYPE_MIUI,
-                cc.sys.BROWSER_TYPE_HUAWEI,
-                cc.sys.BROWSER_TYPE_UC,
             ].indexOf(cc.sys.browserType) < 0);
         }
 
@@ -75,15 +79,12 @@ window.boot = function () {
                     if (cc.sys.isBrowser) {
                         // show canvas
                         var canvas = document.getElementById('GameCanvas');
-                        canvas.style.visibility = '';
+                        canvas.style.visibility = 'visible';
                         var div = document.getElementById('GameDiv');
                         if (div) {
                             div.style.backgroundImage = '';
                         }
                         console.log('Success to load scene: ' + launchScene);
-						
-						var gameCanvas = document.getElementById('GameCanvas');
-						gameCanvas.style.visibility = "visible";
                     }
                 }
             }
@@ -106,7 +107,8 @@ window.boot = function () {
         server: settings.server
     });
     
-    var bundleRoot = [INTERNAL];
+    let bundleRoot = [INTERNAL, MAIN];
+    settings.hasStartSceneBundle && bundleRoot.push(START_SCENE);
     settings.hasResourcesBundle && bundleRoot.push(RESOURCES);
 
     var count = 0;
@@ -114,15 +116,13 @@ window.boot = function () {
         if (err) return console.error(err.message, err.stack);
         count++;
         if (count === bundleRoot.length + 1) {
-            cc.assetManager.loadBundle(MAIN, function (err) {
-                if (!err) cc.game.run(option, onStart);
-            });
+            cc.game.run(option, onStart);
         }
     }
 
     cc.assetManager.loadScript(settings.jsList.map(function (x) { return 'src/' + x;}), cb);
 
-    for (var i = 0; i < bundleRoot.length; i++) {
+    for (let i = 0; i < bundleRoot.length; i++) {
         cc.assetManager.loadBundle(bundleRoot[i], cb);
     }
 };
