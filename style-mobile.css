@@ -170,8 +170,8 @@ p.footer {
                         transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%,
                         transparent 75%, transparent);            
     
-    animation: animate-stripes 1s linear infinite; 
-	border-radius: 30px;
+    animation: animate-stripes 1s linear infinite;    
+	border-radius: 30px;	
 }
 
 @keyframes animate-stripes {
